@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+    nginx:
+        container_name: nginx
+        build: ./containers/nginx
+        ports:
+          - 443:443
+        volumes:
+          - ./wordpress_data:/var/www/html
+        restart: always
+        networks:
+          - network
+
+    wordpress:
+        build: ./containers/wordpress
+        restart: always
+        environment:
+          # WORDPRESS_DB_HOST: mysql
+          # MYSQL_ROOT_PASSWORD: password
+          WORDPRESS_DB_USER: alfred
+          WORDPRESS_DB_PASSWORD: password
+          WORDPRESS_DB_NAME: db
+          WORDPRESS_TABLE_PREFIX: wp_
+        volumes:
+          - ./wordpress_data:/var/www/html
+  # mysql:
+  #   image: mariadb:latest
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: password
+  #     MYSQL_DATABASE: db
+  #     MYSQL_USER: alfred
+  #     MYSQL_PASSWORD: password
+  #   volumes:
+  #       - ./db-data:/var/lib/db
+
+
+networks:
+  network:
+    driver: bridge
