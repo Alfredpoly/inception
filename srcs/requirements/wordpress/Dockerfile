@@ -1,6 +1,6 @@
 FROM debian:latest
 
-RUN apt-get -y update && apt-get -y install php 
+RUN apt-get -y update && apt-get -y install php-fpm
 
 ADD https://wordpress.org/latest.tar.gz /tmp/latest.tar.gz
 RUN cd tmp && tar xvf latest.tar.gz && \
