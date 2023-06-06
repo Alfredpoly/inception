@@ -1,35 +1,44 @@
-#!/bin/sh
+#!bin/bash
 
-mysql_install_db
+if [ ! -d /run/mysqld ] #checks if the database is not already set up
+then
 
-/etc/init.d/mysql start
+	echo "Setting up MariaDB"
 
-if [ -d "/var/lib/mysql/$MYSQL_DATABASE" ]
-then 
+	# Create the run directory for mysqld
+	mkdir -p /run/mysqld
+	chown -R mysql:mysql /run/mysqld
+	chown -R mysql:mysql /var/lib/mysql
 
-	echo "Database already exists"
-else
+	mysql_install_db --basedir=/usr --datadir=/var/lib/mysql #initializes database
 
+# Creates a temporary file to store the SQL commands to be executed, creates the database and the users
+cat << EOF > init.sql
+	USE mysql;
+	FLUSH PRIVILEGES;
 
-mysql_secure_installation << _EOF_
-Y
-root4life
-root4life
-Y
-n
-Y
-Y
-_EOF_
+	DELETE FROM mysql.user WHERE User='';
+	DROP DATABASE test;
+	DELETE FROM mysql.db WHERE Db='test';
 
-mysql -uroot
+	ALTER USER 'root'@'localhost' IDENTIFIED BY '$ROOT_PW';
 
+	CREATE DATABASE IF NOT EXISTS $DB_NAME;
 
-mysql -u root
+	CREATE USER '$WP_BG_LOGIN'@'%';
+	SET PASSWORD FOR '$WP_BG_LOGIN'@'%' = PASSWORD('$WP_BG_PW');
+	GRANT ALL PRIVILEGES ON wordpress.* TO '$WP_BG_LOGIN'@'%';
+	GRANT ALL ON wordpress.* to '$WP_BG_LOGIN'@'%';
+	FLUSH PRIVILEGES;
 
-mysql -uroot -p$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < /usr/local/bin/wordpress.sql
+	CREATE USER '$WP_SG_LOGIN'@'%';
+	SET PASSWORD FOR '$WP_SG_LOGIN'@'%' = PASSWORD('$WP_SG_PW');
+EOF
+
+mysqld --user=mysql --bootstrap < init.sql
 
 fi
 
-/etc/init.d/mysql stop
+echo "MariaDB started"
 
-exec "$@"
+exec mysqld --user=mysql --console #starts database server in foreground

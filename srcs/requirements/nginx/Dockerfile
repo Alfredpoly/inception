@@ -1,12 +1,18 @@
-FROM debian:latest
+FROM debian:buster
 
-RUN apt-get -y update && apt-get -y install nginx openssl
-RUN mkdir -p /etc/nginx/ssl
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/localhost.key -out /etc/nginx/ssl/localhost.crt -subj "/C=NL/ST=Amsterdam/L=Amsterdam/O=Codam/OU=fpolycar/CN=fpolycar/"
+RUN apt-get update
+RUN apt-get install -y nginx openssl curl
+RUN apt-get -y install libfcgi0ldbl
 
-COPY ./conf/nginx.conf /etc/nginx/conf.d
-COPY ./index.html /usr/local/nginx/html/index.html
+COPY conf/nginx.conf /etc/nginx/sites-available/default.conf
+COPY start.sh .
+
+RUN chmod +x start.sh
+
+RUN ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/default.conf
+
+RUN openssl req -x509 -nodes -newkey rsa:2048 -keyout /etc/nginx/key.key -out /etc/nginx/crt.crt -subj "/CN=mgraaf.42.fr"
 
 EXPOSE 443
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT [ "./start.sh" ]

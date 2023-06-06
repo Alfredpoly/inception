@@ -1,12 +1,20 @@
-FROM debian:latest
+FROM debian:buster
 
-RUN apt-get -y update && apt-get -y install php-fpm
+RUN apt-get update
+RUN apt-get install -y php-fpm php-mysql wget mariadb-client
 
-ADD https://wordpress.org/latest.tar.gz /tmp/latest.tar.gz
-RUN cd tmp && tar xvf latest.tar.gz && \
-    mv /tmp/wordpress/* /var/www && \
-    rm -rf wordpress/* && \
-    rm latest.tar.gz && \
-    chown -R www-data:www-data /var/www
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+RUN chmod u+x wp-cli.phar
+RUN mv wp-cli.phar /usr/local/bin/wp
 
-# CMD ["nginx", "-g", "daemon off;"]
+RUN sed 's|listen = /run/php/php7.3-fpm.sock|listen = 0.0.0.0:9000|g' -i /etc/php/7.3/fpm/pool.d/www.conf
+RUN mkdir -p /run/php
+
+COPY tools/wp_setup.sh .
+COPY tools/wait.sh .
+RUN chmod +x wp_setup.sh
+RUN chmod +x wait.sh
+
+EXPOSE 9000
+
+ENTRYPOINT ["./wp_setup.sh"]
