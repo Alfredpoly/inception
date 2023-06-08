@@ -6,8 +6,8 @@ LIST_VOLUMES := $(shell docker volume ls -q)
 all: up
 
 up:
-	mkdir -p /home/fpolycar/data/mariadb
-	mkdir -p /home/fpolycar/data/wordpress
+	mkdir -m 777 -p /Users/alfred/data/mariadb
+	mkdir -m 777 -p /Users/alfred/data/wordpress
 	docker-compose -f srcs/docker-compose.yaml up --build
 
 stop:
@@ -20,6 +20,6 @@ reset:
 	docker-compose -f srcs/docker-compose.yaml down
 	docker rm -f $(LIST_CONTAINERS)
 	docker volume rm -f $(LIST_VOLUMES)
-	rm -r /home/mgraaf/data
+	rm -rf /Users/alfred/data
 
 re: reset up
