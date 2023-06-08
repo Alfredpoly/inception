@@ -8,16 +8,16 @@ all: up
 up:
 	mkdir -p /home/fpolycar/data/mariadb
 	mkdir -p /home/fpolycar/data/wordpress
-	docker-compose -f src/docker-compose.yml up --build
+	docker-compose -f srcs/docker-compose.yaml up --build
 
 stop:
-	docker-compose -f src/docker-compose.yml stop
+	docker-compose -f srcs/docker-compose.yaml stop
 
 kill:
-	docker-compose -f src/docker-compose.yml kill
+	docker-compose -f srcs/docker-compose.yaml kill
 
 reset:
-	docker-compose -f src/docker-compose.yml down
+	docker-compose -f srcs/docker-compose.yaml down
 	docker rm -f $(LIST_CONTAINERS)
 	docker volume rm -f $(LIST_VOLUMES)
 	rm -r /home/mgraaf/data
