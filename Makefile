@@ -6,8 +6,8 @@ LIST_VOLUMES := $(shell docker volume ls -q)
 all: up
 
 up:
-	mkdir -m 777 -p /home/fpolycar/data/mariadb
-	mkdir -m 777 -p /home/fpolycar/data/wordpress
+	mkdir -p /home/fpolycar/data/mariadb
+	mkdir -p /home/fpolycar/data/wordpress
 	docker compose -f srcs/docker-compose.yaml up --build
 
 stop:
